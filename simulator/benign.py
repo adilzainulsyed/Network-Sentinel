@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 from scapy.all import IP, TCP, UDP, DNS, DNSQR, Ether, Raw
 import random
 import time

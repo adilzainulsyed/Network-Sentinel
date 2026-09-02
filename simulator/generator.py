@@ -10,37 +10,40 @@ from dns_tunnel import generate_dns_tunnel
 
 def main():
     parser = argparse.ArgumentParser(description="NTRO Network Traffic Simulator")
-    parser.add_argument("--num_packets", type=int, default=100, help="Number of packets to generate per scenario")
     parser.add_argument("--out_dir", type=str, default="../data/pcaps", help="Output directory for PCAPs")
     args = parser.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    print(f"Generating scenarios with {args.num_packets} packets each...")
+    # Requested flow counts
+    counts = {
+        "BENIGN": 5000,
+        "SYN_FLOOD": 2000,
+        "PORT_SCAN": 2000,
+        "C2_BEACON": 2000,
+        "DNS_TUNNEL": 2000
+    }
 
-    # Generate Benign
-    print("Generating BENIGN traffic...")
-    benign_pkts = generate_benign(num_packets=args.num_packets)
+    print("Generating scenarios...")
+
+    print(f"Generating {counts['BENIGN']} BENIGN flows...")
+    benign_pkts = generate_benign(num_packets=counts['BENIGN'])
     wrpcap(os.path.join(args.out_dir, "benign.pcap"), benign_pkts)
 
-    # Generate SYN Flood
-    print("Generating SYN_FLOOD traffic...")
-    syn_flood_pkts = generate_syn_flood(num_packets=args.num_packets)
+    print(f"Generating {counts['SYN_FLOOD']} SYN_FLOOD flows...")
+    syn_flood_pkts = generate_syn_flood(num_packets=counts['SYN_FLOOD'])
     wrpcap(os.path.join(args.out_dir, "syn_flood.pcap"), syn_flood_pkts)
 
-    # Generate Port Scan
-    print("Generating PORT_SCAN traffic...")
-    port_scan_pkts = generate_port_scan(num_packets=args.num_packets)
+    print(f"Generating {counts['PORT_SCAN']} PORT_SCAN flows...")
+    port_scan_pkts = generate_port_scan(num_packets=counts['PORT_SCAN'])
     wrpcap(os.path.join(args.out_dir, "port_scan.pcap"), port_scan_pkts)
 
-    # Generate C2 Beacon
-    print("Generating C2_BEACON traffic...")
-    c2_pkts = generate_c2_beacon(num_packets=args.num_packets)
+    print(f"Generating {counts['C2_BEACON']} C2_BEACON flows...")
+    c2_pkts = generate_c2_beacon(num_packets=counts['C2_BEACON'])
     wrpcap(os.path.join(args.out_dir, "c2_beacon.pcap"), c2_pkts)
 
-    # Generate DNS Tunnel
-    print("Generating DNS_TUNNEL traffic...")
-    dns_pkts = generate_dns_tunnel(num_packets=args.num_packets)
+    print(f"Generating {counts['DNS_TUNNEL']} DNS_TUNNEL flows...")
+    dns_pkts = generate_dns_tunnel(num_packets=counts['DNS_TUNNEL'])
     wrpcap(os.path.join(args.out_dir, "dns_tunnel.pcap"), dns_pkts)
 
     print("Generation complete! Check the output directory.")
