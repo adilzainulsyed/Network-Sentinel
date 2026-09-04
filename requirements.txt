@@ -13,6 +13,7 @@ scapy
 # Web API
 fastapi
 uvicorn
+python-multipart
 
 # Visualization
 matplotlib

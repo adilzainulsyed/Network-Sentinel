@@ -2,14 +2,12 @@
 FastAPI wrapper for Network-Sentinel detection pipeline
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 import sys
 import tempfile
-import uuid
 from datetime import datetime
 import json
 
@@ -59,7 +57,7 @@ except Exception as e:
 
 class SimulationRequest(BaseModel):
     scenario: str
-    num_packets: Optional[int] = 100
+    num_packets: int = Field(default=100, ge=1, le=10000)
 
 
 class HealthResponse(BaseModel):
@@ -90,6 +88,67 @@ class StatisticsResponse(BaseModel):
     uptime_seconds: float
 
 
+def _analyze_pcap_path(pcap_path: str, summary_prefix: str) -> AnalysisResponse:
+    """Run the existing flow, feature, model, and evidence pipeline for a PCAP."""
+    flow_ext = FlowExtractor()
+    flow_ext.process_pcap(pcap_path)
+    df_flows = flow_ext.to_dataframe()
+
+    if df_flows.empty:
+        return AnalysisResponse(
+            status="success",
+            total_flows=0,
+            threats_detected={},
+            alerts=[],
+            summary=f"{summary_prefix}: no flows found",
+        )
+
+    feat_ext = FeatureExtractor(df_flows)
+    df_features = feat_ext.extract_features()
+    for column in feature_columns:
+        if column not in df_features.columns:
+            df_features[column] = 0
+
+    predictions = clf.predict(df_features[feature_columns].fillna(0))
+    alert_generator = AlertGenerator(EvidenceEngine())
+    threat_alerts = []
+    threat_counts = {}
+
+    for index, prediction in enumerate(predictions):
+        if prediction == "BENIGN":
+            continue
+        flow_data = df_flows.iloc[index].to_dict()
+        flow_data.update(df_features.iloc[index].to_dict())
+        alert = alert_generator.generate_alert(flow_data, prediction, confidence=1.0)
+        threat_alerts.append(alert)
+        threat_counts[prediction] = threat_counts.get(prediction, 0) + 1
+
+    recent_alerts.extend(threat_alerts)
+    del recent_alerts[:-100]
+    traffic_statistics["total_flows_analyzed"] += len(df_flows)
+    for threat, count in threat_counts.items():
+        traffic_statistics["threats_detected"][threat] = (
+            traffic_statistics["threats_detected"].get(threat, 0) + count
+        )
+    traffic_statistics["threats_detected"]["BENIGN"] += (
+        len(predictions) - sum(threat_counts.values())
+    )
+
+    total_threats = sum(threat_counts.values())
+    summary = f"{summary_prefix}: analyzed {len(df_flows)} flows, detected {total_threats} threats"
+    if threat_counts:
+        summary += ": " + ", ".join(
+            f"{threat}: {count}" for threat, count in threat_counts.items()
+        )
+    return AnalysisResponse(
+        status="success",
+        total_flows=len(df_flows),
+        threats_detected=threat_counts,
+        alerts=threat_alerts,
+        summary=summary,
+    )
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health():
     """Health check endpoint"""
@@ -106,89 +165,20 @@ async def analyze_pcap(file: UploadFile = File(...)):
     if clf is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     
-    # Save uploaded file temporarily
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="A PCAP file is required")
+
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pcap")
     try:
-        # Write uploaded content to temp file
         content = await file.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="The uploaded PCAP is empty")
         temp_file.write(content)
         temp_file.close()
-        
-        # Run detection pipeline
-        flow_ext = FlowExtractor()
-        flow_ext.process_pcap(temp_file.name)
-        df_flows = flow_ext.to_dataframe()
-        
-        if df_flows.empty:
-            return AnalysisResponse(
-                status="success",
-                total_flows=0,
-                threats_detected={},
-                alerts=[],
-                summary="No flows found in PCAP file"
-            )
-        
-        # Extract features
-        feat_ext = FeatureExtractor(df_flows)
-        df_features = feat_ext.extract_features()
-        
-        # Prepare data for prediction
-        for col in feature_columns:
-            if col not in df_features.columns:
-                df_features[col] = 0
-        
-        X = df_features[feature_columns].fillna(0)
-        
-        # Predict
-        predictions = clf.predict(X)
-        
-        # Generate evidence-based alerts
-        evidence_engine = EvidenceEngine()
-        alert_generator = AlertGenerator(evidence_engine)
-        
-        threat_alerts = []
-        threat_counts = {}
-        
-        for idx in range(len(df_flows)):
-            prediction = predictions[idx]
-            if prediction != 'BENIGN':
-                # Combine flow data with feature data
-                flow_data = df_flows.iloc[idx].to_dict()
-                feature_data = df_features.iloc[idx].to_dict()
-                flow_data.update(feature_data)
-                
-                alert = alert_generator.generate_alert(flow_data, prediction, confidence=1.0)
-                threat_alerts.append(alert)
-                
-                # Update counts
-                threat_counts[prediction] = threat_counts.get(prediction, 0) + 1
-                
-                # Add to recent alerts (keep last 100)
-                recent_alerts.append(alert)
-                if len(recent_alerts) > 100:
-                    recent_alerts.pop(0)
-        
-        # Update global statistics
-        traffic_statistics["total_flows_analyzed"] += len(df_flows)
-        for threat, count in threat_counts.items():
-            traffic_statistics["threats_detected"][threat] = traffic_statistics["threats_detected"].get(threat, 0) + count
-        traffic_statistics["threats_detected"]["BENIGN"] = traffic_statistics["threats_detected"].get("BENIGN", 0) + (len(predictions) - sum(threat_counts.values()))
-        
-        # Generate summary
-        total_threats = sum(threat_counts.values())
-        summary = f"Analyzed {len(df_flows)} flows, detected {total_threats} threats"
-        if threat_counts:
-            summary += ": " + ", ".join([f"{k}: {v}" for k, v in threat_counts.items()])
-        
-        return AnalysisResponse(
-            status="success",
-            total_flows=len(df_flows),
-            threats_detected=threat_counts,
-            alerts=threat_alerts,
-            summary=summary
-        )
-        
+        return _analyze_pcap_path(temp_file.name, "Analyzed")
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
     finally:
         # Clean up temp file
@@ -232,79 +222,7 @@ async def simulate_scenario(request: SimulationRequest):
         wrpcap(temp_file.name, packets)
         temp_file.close()
         
-        # Run detection pipeline
-        flow_ext = FlowExtractor()
-        flow_ext.process_pcap(temp_file.name)
-        df_flows = flow_ext.to_dataframe()
-        
-        if df_flows.empty:
-            return AnalysisResponse(
-                status="success",
-                total_flows=0,
-                threats_detected={},
-                alerts=[],
-                summary=f"No flows generated for {scenario} scenario"
-            )
-        
-        # Extract features
-        feat_ext = FeatureExtractor(df_flows)
-        df_features = feat_ext.extract_features()
-        
-        # Prepare data for prediction
-        for col in feature_columns:
-            if col not in df_features.columns:
-                df_features[col] = 0
-        
-        X = df_features[feature_columns].fillna(0)
-        
-        # Predict
-        predictions = clf.predict(X)
-        
-        # Generate evidence-based alerts
-        evidence_engine = EvidenceEngine()
-        alert_generator = AlertGenerator(evidence_engine)
-        
-        threat_alerts = []
-        threat_counts = {}
-        
-        for idx in range(len(df_flows)):
-            prediction = predictions[idx]
-            if prediction != 'BENIGN':
-                # Combine flow data with feature data
-                flow_data = df_flows.iloc[idx].to_dict()
-                feature_data = df_features.iloc[idx].to_dict()
-                flow_data.update(feature_data)
-                
-                alert = alert_generator.generate_alert(flow_data, prediction, confidence=1.0)
-                threat_alerts.append(alert)
-                
-                # Update counts
-                threat_counts[prediction] = threat_counts.get(prediction, 0) + 1
-                
-                # Add to recent alerts
-                recent_alerts.append(alert)
-                if len(recent_alerts) > 100:
-                    recent_alerts.pop(0)
-        
-        # Update global statistics
-        traffic_statistics["total_flows_analyzed"] += len(df_flows)
-        for threat, count in threat_counts.items():
-            traffic_statistics["threats_detected"][threat] = traffic_statistics["threats_detected"].get(threat, 0) + count
-        traffic_statistics["threats_detected"]["BENIGN"] = traffic_statistics["threats_detected"].get("BENIGN", 0) + (len(predictions) - sum(threat_counts.values()))
-        
-        # Generate summary
-        total_threats = sum(threat_counts.values())
-        summary = f"Simulated {scenario} with {len(df_flows)} flows, detected {total_threats} threats"
-        if threat_counts:
-            summary += ": " + ", ".join([f"{k}: {v}" for k, v in threat_counts.items()])
-        
-        return AnalysisResponse(
-            status="success",
-            total_flows=len(df_flows),
-            threats_detected=threat_counts,
-            alerts=threat_alerts,
-            summary=summary
-        )
+        return _analyze_pcap_path(temp_file.name, f"Simulated {scenario}")
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Simulation failed: {str(e)}")
@@ -315,7 +233,7 @@ async def simulate_scenario(request: SimulationRequest):
 
 
 @app.get("/alerts", response_model=AlertsResponse)
-async def get_alerts(limit: int = 10):
+async def get_alerts(limit: int = Query(default=10, ge=1, le=100)):
     """Get recent alerts"""
     return AlertsResponse(
         status="success",
