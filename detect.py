@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from backend.app.flows.extractor import FlowExtractor
 from backend.app.features.extractor import FeatureExtractor
+from backend.app.evidence import EvidenceEngine, AlertGenerator
 
 def main():
     parser = argparse.ArgumentParser(description="NTRO Network Threat Detector Inference")
@@ -73,13 +74,53 @@ def main():
     for label, count in counts.items():
         print(f"{label}: {count} flows ({count/len(predictions)*100:.2f}%)")
 
-    # Optionally, you can save the detailed results
+    # Generate evidence-based alerts
+    print("\n--- Generating Evidence-Based Alerts ---")
+    evidence_engine = EvidenceEngine()
+    alert_generator = AlertGenerator(evidence_engine)
+    
+    # Generate alerts for non-benign detections only
+    threat_alerts = []
+    
+    for idx in range(len(df_flows)):
+        prediction = predictions[idx]
+        if prediction != 'BENIGN':
+            # Combine flow data with feature data
+            flow_data = df_flows.iloc[idx].to_dict()
+            feature_data = df_features.iloc[idx].to_dict()
+            flow_data.update(feature_data)
+            
+            alert = alert_generator.generate_alert(flow_data, prediction, confidence=1.0)
+            threat_alerts.append(alert)
+    
+    print(f"Generated {len(threat_alerts)} evidence-based alerts")
+    
+    # Display sample alerts (first 3)
+    sample_alerts = threat_alerts[:3]
+    if sample_alerts:
+        print("\n--- Sample Alerts ---")
+        for i, alert in enumerate(sample_alerts, 1):
+            print(f"\nAlert {i}:")
+            print(f"  Threat: {alert['threat_class']}")
+            print(f"  Severity: {alert['severity']}")
+            print(f"  Source: {alert['source_ip']}:{alert['source_port']} -> {alert['destination_ip']}:{alert['destination_port']}")
+            print(f"  Summary: {alert['summary']}")
+            print(f"  Evidence:")
+            for evidence in alert['evidence']:
+                print(f"    - {evidence}")
+    
+    # Save detailed alerts with evidence
+    out_json = args.pcap_file.replace('.pcap', '_alerts.json')
+    with open(out_json, 'w') as f:
+        json.dump(threat_alerts, f, indent=2)
+    print(f"\nEvidence-based alerts saved to {out_json}")
+    
+    # Also save CSV for compatibility
     out_csv = args.pcap_file.replace('.pcap', '_alerts.csv')
-    # Save a subset of info for the alerts
     alert_cols = ['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol', 'prediction']
     df_alerts = df_flows[alert_cols]
     df_alerts.to_csv(out_csv, index=False)
-    print(f"\nDetailed alerts saved to {out_csv}")
+    print(f"Basic alerts saved to {out_csv}")
 
 if __name__ == "__main__":
     main()
