@@ -50,8 +50,26 @@ def main():
     
     wrpcap(os.path.join(args.out_dir, "c2_beacon.pcap"), c2_pkts)
 
-    print(f"Generating {counts['DNS_TUNNEL']} DNS_TUNNEL flows...")
-    dns_pkts = generate_dns_tunnel(num_packets=counts['DNS_TUNNEL'])
+    print(f"Generating {counts['DNS_TUNNEL']} DNS_TUNNEL flows with varying patterns...")
+    # Generate DNS tunnel with varying patterns for training diversity
+    dns_pkts = []
+    tunnel_configs = [
+        {"min_length": 10, "max_length": 20, "encoding": True},
+        {"min_length": 15, "max_length": 30, "encoding": True},
+        {"min_length": 20, "max_length": 40, "encoding": False},
+        {"min_length": 25, "max_length": 35, "encoding": True}
+    ]
+    packets_per_config = counts['DNS_TUNNEL'] // len(tunnel_configs)
+    
+    for config in tunnel_configs:
+        pkts = generate_dns_tunnel(
+            num_packets=packets_per_config,
+            min_subdomain_length=config["min_length"],
+            max_subdomain_length=config["max_length"],
+            encoding_variety=config["encoding"]
+        )
+        dns_pkts.extend(pkts)
+    
     wrpcap(os.path.join(args.out_dir, "dns_tunnel.pcap"), dns_pkts)
 
     print("Generation complete! Check the output directory.")

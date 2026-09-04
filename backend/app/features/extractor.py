@@ -57,6 +57,16 @@ class FeatureExtractor:
                 return 0.0
             return np.mean([len(q) for q in queries])
 
+        def process_dns_max_length(queries):
+            if not queries:
+                return 0.0
+            return max([len(q) for q in queries])
+
+        def process_dns_count(queries):
+            if not queries:
+                return 0
+            return len(queries)
+
         def process_dns_entropy(queries):
             if not queries:
                 return 0.0
@@ -64,8 +74,36 @@ class FeatureExtractor:
             combined = "".join(queries)
             return self._shannon_entropy(combined)
 
+        def process_dns_unique_subdomains(queries):
+            if not queries:
+                return 0
+            # Extract unique subdomains (parts before the main domain)
+            subdomains = set()
+            for query in queries:
+                parts = query.split('.')
+                if len(parts) > 2:  # Has subdomain(s)
+                    subdomains.add(parts[0])  # Take first subdomain
+            return len(subdomains)
+
+        def process_dns_subdomain_entropy(queries):
+            if not queries:
+                return 0.0
+            # Calculate entropy of subdomain parts
+            subdomain_chars = []
+            for query in queries:
+                parts = query.split('.')
+                if len(parts) > 2:
+                    subdomain_chars.extend(list(parts[0]))  # Characters from first subdomain
+            if not subdomain_chars:
+                return 0.0
+            return self._shannon_entropy(subdomain_chars)
+
         self.df['dns_query_length'] = self.df['dns_queries'].apply(process_dns_length)
+        self.df['dns_max_query_length'] = self.df['dns_queries'].apply(process_dns_max_length)
+        self.df['dns_query_count'] = self.df['dns_queries'].apply(process_dns_count)
         self.df['dns_entropy'] = self.df['dns_queries'].apply(process_dns_entropy)
+        self.df['dns_unique_subdomain_count'] = self.df['dns_queries'].apply(process_dns_unique_subdomains)
+        self.df['dns_subdomain_entropy'] = self.df['dns_queries'].apply(process_dns_subdomain_entropy)
 
         # Diversity features: dst_port_count and dst_host_count
         # Group by source IP to find how many unique destinations and ports it contacts
@@ -91,7 +129,8 @@ class FeatureExtractor:
             'mean_packet_size', 'std_packet_size',
             'mean_interarrival', 'std_interarrival', 'cv_interarrival',
             'dst_port_count', 'dst_host_count', 'dst_connection_count',
-            'src_dst_byte_ratio', 'dns_query_length', 'dns_entropy'
+            'src_dst_byte_ratio', 'dns_query_length', 'dns_max_query_length', 
+            'dns_query_count', 'dns_entropy', 'dns_unique_subdomain_count', 'dns_subdomain_entropy'
         ]
         
         return self.df[features]
