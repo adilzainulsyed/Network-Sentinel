@@ -38,8 +38,16 @@ def main():
     port_scan_pkts = generate_port_scan(num_packets=counts['PORT_SCAN'])
     wrpcap(os.path.join(args.out_dir, "port_scan.pcap"), port_scan_pkts)
 
-    print(f"Generating {counts['C2_BEACON']} C2_BEACON flows...")
-    c2_pkts = generate_c2_beacon(num_packets=counts['C2_BEACON'])
+    print(f"Generating {counts['C2_BEACON']} C2_BEACON flows with varying intervals...")
+    # Generate C2 beacon with varying intervals for training diversity
+    c2_pkts = []
+    intervals = [30.0, 60.0, 120.0, 300.0]  # Different beacon intervals
+    packets_per_interval = counts['C2_BEACON'] // len(intervals)
+    
+    for interval in intervals:
+        pkts = generate_c2_beacon(num_packets=packets_per_interval, base_interval=interval, jitter_percent=0.2)
+        c2_pkts.extend(pkts)
+    
     wrpcap(os.path.join(args.out_dir, "c2_beacon.pcap"), c2_pkts)
 
     print(f"Generating {counts['DNS_TUNNEL']} DNS_TUNNEL flows...")

@@ -1,0 +1,1 @@
+["protocol", "flow_duration", "packet_count", "byte_count", "packets_per_second", "bytes_per_second", "mean_packet_size", "std_packet_size", "mean_interarrival", "std_interarrival", "cv_interarrival", "dst_port_count", "dst_host_count", "dst_connection_count", "src_dst_byte_ratio", "dns_query_length", "dns_entropy"]

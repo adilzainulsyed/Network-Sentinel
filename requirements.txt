@@ -1,0 +1,22 @@
+# Core data processing
+numpy<2.0
+pandas
+scipy
+
+# Machine Learning
+scikit-learn
+joblib
+
+# Network packet analysis
+scapy
+
+# Web API
+fastapi
+uvicorn
+
+# Visualization
+matplotlib
+seaborn
+
+# Standard libraries (these are usually included, but listed for completeness)
+# collections, json, os, sys, argparse, random, socket, struct

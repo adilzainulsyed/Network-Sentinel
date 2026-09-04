@@ -29,14 +29,21 @@ class FeatureExtractor:
         self.df['mean_packet_size'] = self.df['packet_sizes'].apply(lambda x: np.mean(x) if x else 0)
         self.df['std_packet_size'] = self.df['packet_sizes'].apply(lambda x: np.std(x) if len(x) > 1 else 0)
 
-        # Interarrival time
-        def mean_iat(timestamps):
+        # Interarrival time statistics for beaconing detection
+        def calc_iat_stats(timestamps):
             if len(timestamps) > 1:
                 iats = np.diff(timestamps)
-                return np.mean(iats)
-            return 0.0
+                mean_iat = np.mean(iats)
+                std_iat = np.std(iats) if len(iats) > 1 else 0.0
+                # Coefficient of variation (std/mean) - low CV indicates regularity (beaconing)
+                cv_iat = std_iat / mean_iat if mean_iat > 0 else 0.0
+                return mean_iat, std_iat, cv_iat
+            return 0.0, 0.0, 0.0
             
-        self.df['mean_interarrival'] = self.df['timestamps'].apply(mean_iat)
+        iat_stats = self.df['timestamps'].apply(calc_iat_stats)
+        self.df['mean_interarrival'] = [x[0] for x in iat_stats]
+        self.df['std_interarrival'] = [x[1] for x in iat_stats]
+        self.df['cv_interarrival'] = [x[2] for x in iat_stats]
 
         # Byte ratios
         self.df['src_dst_byte_ratio'] = self.df.apply(
@@ -68,13 +75,22 @@ class FeatureExtractor:
         self.df['dst_host_count'] = self.df['src_ip'].map(host_counts)
         self.df['dst_port_count'] = self.df['src_ip'].map(port_counts)
 
+        # Destination repetition features for beaconing detection
+        # Count how many times each source connects to the same destination
+        connection_counts = self.df.groupby(['src_ip', 'dst_ip']).size().to_dict()
+        self.df['dst_connection_count'] = self.df.apply(
+            lambda row: connection_counts.get((row['src_ip'], row['dst_ip']), 0), 
+            axis=1
+        )
+
         # Select ML-ready columns
         features = [
             'src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol',
             'flow_duration', 'packet_count', 'byte_count',
             'packets_per_second', 'bytes_per_second',
             'mean_packet_size', 'std_packet_size',
-            'mean_interarrival', 'dst_port_count', 'dst_host_count',
+            'mean_interarrival', 'std_interarrival', 'cv_interarrival',
+            'dst_port_count', 'dst_host_count', 'dst_connection_count',
             'src_dst_byte_ratio', 'dns_query_length', 'dns_entropy'
         ]
         
