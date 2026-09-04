@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #dce7ec;
+  background: #071015;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #071015; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.mono { font-family: 'DM Mono', monospace; }
+.panel { border: 1px solid #1d333b; background: linear-gradient(145deg, rgba(16, 31, 37, .94), rgba(8, 19, 24, .94)); box-shadow: 0 14px 40px rgba(0, 0, 0, .16); }
+.grid-bg { background-image: linear-gradient(rgba(62, 112, 119, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(62, 112, 119, .055) 1px, transparent 1px); background-size: 32px 32px; }
+.status-pulse { animation: pulse 2.2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.reveal { animation: rise .45s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
