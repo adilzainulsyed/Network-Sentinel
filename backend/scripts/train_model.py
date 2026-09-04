@@ -3,9 +3,11 @@ import sys
 import json
 import pandas as pd
 import joblib
+import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from datetime import datetime, timezone
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
@@ -58,8 +60,21 @@ def main():
     print("Test Accuracy:", acc)
     
     print("\nClassification Report (Test):")
+    report_dict = classification_report(y_test, y_test_pred, output_dict=True)
     report = classification_report(y_test, y_test_pred)
     print(report)
+
+    metrics_path = os.path.join(models_dir, "validation_metrics.json")
+    with open(metrics_path, "w") as f:
+        json.dump({
+            "split": {"train": len(X_train), "validation": len(X_val), "test": len(X_test)},
+            "accuracy": acc,
+            "classification_report": report_dict,
+            "confusion_matrix": confusion_matrix(y_test, y_test_pred, labels=clf.classes_).tolist(),
+            "labels": list(clf.classes_),
+            "evaluation_note": "Random stratified row split; samples are not capture-disjoint, so this is not a production generalization estimate.",
+        }, f, indent=2)
+    print(f"Saved validation metrics to {metrics_path}")
     
     # Generate Confusion Matrix
     try:
@@ -84,6 +99,18 @@ def main():
     model_path = os.path.join(models_dir, "rf_model.joblib")
     joblib.dump(clf, model_path)
     print(f"Saved trained model to {model_path}")
+
+    metadata_path = os.path.join(models_dir, "model_metadata.json")
+    with open(metadata_path, "w") as f:
+        json.dump({
+            "name": "Random Forest",
+            "version": "1.0.0",
+            "sklearn_version": sklearn.__version__,
+            "training_timestamp": datetime.now(timezone.utc).isoformat(),
+            "feature_columns": feature_columns,
+            "classes": list(clf.classes_),
+        }, f, indent=2)
+    print(f"Saved model metadata to {metadata_path}")
 
 if __name__ == "__main__":
     main()

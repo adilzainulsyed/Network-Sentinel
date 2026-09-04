@@ -1,0 +1,36 @@
+{
+  "name": "Random Forest",
+  "version": "1.0.0",
+  "sklearn_version": "1.7.2",
+  "training_timestamp": "2026-09-04T14:51:26.273647+00:00",
+  "feature_columns": [
+    "protocol",
+    "flow_duration",
+    "packet_count",
+    "byte_count",
+    "packets_per_second",
+    "bytes_per_second",
+    "mean_packet_size",
+    "std_packet_size",
+    "mean_interarrival",
+    "std_interarrival",
+    "cv_interarrival",
+    "dst_port_count",
+    "dst_host_count",
+    "dst_connection_count",
+    "src_dst_byte_ratio",
+    "dns_query_length",
+    "dns_max_query_length",
+    "dns_query_count",
+    "dns_entropy",
+    "dns_unique_subdomain_count",
+    "dns_subdomain_entropy"
+  ],
+  "classes": [
+    "BENIGN",
+    "C2_BEACON",
+    "DNS_TUNNEL",
+    "PORT_SCAN",
+    "SYN_FLOOD"
+  ]
+}

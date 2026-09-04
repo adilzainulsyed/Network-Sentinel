@@ -1,0 +1,96 @@
+{
+  "samples": 1829,
+  "classification_report": {
+    "BENIGN": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 73.0
+    },
+    "C2_BEACON": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 37.0
+    },
+    "DNS_TUNNEL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 83.0
+    },
+    "PORT_SCAN": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1500.0
+    },
+    "SYN_FLOOD": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 136.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1829.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1829.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      73,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      37,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      83,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1500,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      136
+    ]
+  ],
+  "labels": [
+    "BENIGN",
+    "C2_BEACON",
+    "DNS_TUNNEL",
+    "PORT_SCAN",
+    "SYN_FLOOD"
+  ],
+  "confidence_min": 0.4,
+  "confidence_max": 1.0,
+  "confidence_mean": 0.8872061235647897,
+  "note": "Generated with changed packet counts, ports, targets, beacon intervals, jitter, and DNS lengths/encoding; this is still synthetic and not a production accuracy estimate."
+}

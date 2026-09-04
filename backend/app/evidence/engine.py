@@ -1,317 +1,209 @@
-"""
-Evidence Engine for Network Threat Detection
-Converts detection results into human-readable evidence based on actual feature values
-"""
+"""Evidence and standardized alert generation from measured flow features."""
 
-import pandas as pd
-import numpy as np
 from datetime import datetime
-from typing import Dict, List, Any
+import math
 import uuid
+from typing import Any, Dict, List, Optional
+
+
+EVIDENCE_THRESHOLDS = {
+    "SYN_FLOOD": {"packets_per_second": 1000, "bytes_per_second": 1_000_000, "short_duration": 0.001},
+    "PORT_SCAN": {"dst_port_count": 10, "packets_per_second": 500, "small_packet_size": 80, "short_duration": 0.01},
+    "C2_BEACON": {"repeated_connections": 50, "cv_interarrival": 0.3},
+    "DNS_TUNNEL": {"query_length": 20, "query_entropy": 2.5, "subdomain_entropy": 3.0},
+}
+
+
+def _value(flow_data: Dict[str, Any], name: str) -> Optional[float]:
+    value = flow_data.get(name)
+    if value is None:
+        return None
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return None
+    return value if math.isfinite(value) else None
+
+
+def _protocol_name(protocol: Any) -> Optional[str]:
+    names = {1: "ICMP", 6: "TCP", 17: "UDP"}
+    if protocol is None:
+        return None
+    try:
+        return names.get(int(protocol), str(int(protocol)))
+    except (TypeError, ValueError):
+        return str(protocol)
 
 
 class EvidenceEngine:
     def __init__(self):
         self.evidence_rules = {
-            'SYN_FLOOD': self._syn_flood_evidence,
-            'PORT_SCAN': self._port_scan_evidence,
-            'C2_BEACON': self._c2_beacon_evidence,
-            'DNS_TUNNEL': self._dns_tunnel_evidence,
-            'BENIGN': self._benign_evidence
+            "SYN_FLOOD": self._syn_flood_evidence,
+            "PORT_SCAN": self._port_scan_evidence,
+            "C2_BEACON": self._c2_beacon_evidence,
+            "DNS_TUNNEL": self._dns_tunnel_evidence,
+            "BENIGN": self._benign_evidence,
         }
-    
-    def generate_evidence(self, flow_data: Dict[str, Any], prediction: str, 
-                         confidence: float = 1.0) -> Dict[str, Any]:
-        """
-        Generate evidence for a detected threat based on actual feature values
-        
-        Args:
-            flow_data: Dictionary containing flow features and metadata
-            prediction: Model prediction (threat class)
-            confidence: Detection confidence score
-            
-        Returns:
-            Dictionary containing threat evidence with human-readable explanations
-        """
-        threat_class = prediction
-        evidence_func = self.evidence_rules.get(threat_class, self._generic_evidence)
-        
-        evidence = {
-            'threat_class': threat_class,
-            'confidence': confidence,
-            'evidence': evidence_func(flow_data),
-            'timestamp': datetime.utcnow().isoformat(),
-            'flow_id': str(uuid.uuid4()),
-            'flow_data': flow_data
+
+    def generate_evidence(self, flow_data: Dict[str, Any], prediction: str, confidence: float = 0.0) -> Dict[str, Any]:
+        evidence_func = self.evidence_rules.get(prediction, self._generic_evidence)
+        return {
+            "threat_class": prediction,
+            "confidence": confidence,
+            "evidence": evidence_func(flow_data),
+            "timestamp": datetime.utcnow().isoformat(),
+            "flow_id": str(uuid.uuid4()),
+            "flow_data": flow_data,
         }
-        
-        return evidence
-    
+
     def _syn_flood_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate evidence for SYN_FLOOD detection"""
         evidence = []
-        
-        # High SYN rate evidence
-        packets_per_second = flow_data.get('packets_per_second', 0)
-        if packets_per_second > 1000:
-            evidence.append(f"High packet rate: {packets_per_second:.0f} packets/second (normal < 100)")
-        
-        # Abnormal packet rate
-        bytes_per_second = flow_data.get('bytes_per_second', 0)
-        if bytes_per_second > 1000000:
-            evidence.append(f"High byte rate: {bytes_per_second/1000000:.1f} MB/s (suspicious for SYN flood)")
-        
-        # Flow duration
-        flow_duration = flow_data.get('flow_duration', 0)
-        if flow_duration < 0.001:
-            evidence.append(f"Very short flow duration: {flow_duration*1000:.3f}ms (characteristic of flood attacks)")
-        
-        # Packet size analysis
-        mean_packet_size = flow_data.get('mean_packet_size', 0)
-        if 40 <= mean_packet_size <= 60:
-            evidence.append(f"Small packet size: {mean_packet_size:.0f} bytes (typical SYN packet size)")
-        
-        # Source diversity (if multiple flows from same source)
-        dst_port_count = flow_data.get('dst_port_count', 0)
-        if dst_port_count == 1:
-            evidence.append(f"Single destination port: {dst_port_count} (focused attack on specific service)")
-        
-        if not evidence:
-            evidence.append("SYN flood detected based on multiple suspicious traffic patterns")
-        
+        packet_rate = _value(flow_data, "packets_per_second")
+        byte_rate = _value(flow_data, "bytes_per_second")
+        duration = _value(flow_data, "flow_duration")
+        packet_size = _value(flow_data, "mean_packet_size")
+        port_count = _value(flow_data, "dst_port_count")
+        thresholds = EVIDENCE_THRESHOLDS["SYN_FLOOD"]
+        if packet_rate is not None and packet_rate > thresholds["packets_per_second"]:
+            evidence.append(f"High packet rate: {packet_rate:.0f} packets/second (threshold: {thresholds['packets_per_second']})")
+        if byte_rate is not None and byte_rate > thresholds["bytes_per_second"]:
+            evidence.append(f"High byte rate: {byte_rate / 1_000_000:.1f} MB/s (threshold: {thresholds['bytes_per_second'] / 1_000_000:.1f} MB/s)")
+        if duration is not None and duration < thresholds["short_duration"]:
+            evidence.append(f"Very short flow duration: {duration * 1000:.3f} ms (threshold: {thresholds['short_duration'] * 1000:.3f} ms)")
+        if packet_size is not None and 40 <= packet_size <= 60:
+            evidence.append(f"Small packet size: {packet_size:.1f} bytes")
+        if port_count is not None and port_count == 1:
+            evidence.append(f"Single destination port: {port_count:.0f}")
         return evidence
-    
+
     def _port_scan_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate evidence for PORT_SCAN detection"""
         evidence = []
-        
-        # Destination port diversity
-        dst_port_count = flow_data.get('dst_port_count', 0)
-        if dst_port_count > 100:
-            evidence.append(f"High destination port diversity: {dst_port_count} unique ports (normal < 10)")
-        elif dst_port_count > 10:
-            evidence.append(f"Elevated destination port diversity: {dst_port_count} unique ports")
-        
-        # Destination host diversity
-        dst_host_count = flow_data.get('dst_host_count', 0)
-        if dst_host_count == 1:
-            evidence.append(f"Single target host: {dst_host_count} (focused scanning activity)")
-        elif dst_host_count < 5:
-            evidence.append(f"Limited target hosts: {dst_host_count} (targeted scanning)")
-        
-        # Connection rate
-        packets_per_second = flow_data.get('packets_per_second', 0)
-        if packets_per_second > 500:
-            evidence.append(f"High connection rate: {packets_per_second:.0f} connections/second (rapid scanning)")
-        
-        # Small packet sizes (typical of port scanning)
-        mean_packet_size = flow_data.get('mean_packet_size', 0)
-        if mean_packet_size < 80:
-            evidence.append(f"Small packet size: {mean_packet_size:.0f} bytes (characteristic of SYN scanning)")
-        
-        # Flow duration
-        flow_duration = flow_data.get('flow_duration', 0)
-        if flow_duration < 0.01:
-            evidence.append(f"Short flow duration: {flow_duration*1000:.1f}ms (typical of scan probes)")
-        
-        if not evidence:
-            evidence.append("Port scan detected based on port diversity and scanning patterns")
-        
+        port_count = _value(flow_data, "dst_port_count")
+        host_count = _value(flow_data, "dst_host_count")
+        packet_rate = _value(flow_data, "packets_per_second")
+        packet_size = _value(flow_data, "mean_packet_size")
+        duration = _value(flow_data, "flow_duration")
+        thresholds = EVIDENCE_THRESHOLDS["PORT_SCAN"]
+        if port_count is not None and port_count > thresholds["dst_port_count"]:
+            evidence.append(f"Destination ports contacted: {port_count:.0f} (threshold: {thresholds['dst_port_count']})")
+        if host_count is not None and host_count <= 5:
+            evidence.append(f"Destination hosts contacted: {host_count:.0f}")
+        if packet_rate is not None and packet_rate > thresholds["packets_per_second"]:
+            evidence.append(f"Connection rate: {packet_rate:.0f} packets/second (threshold: {thresholds['packets_per_second']})")
+        if packet_size is not None and packet_size < thresholds["small_packet_size"]:
+            evidence.append(f"Small packet size: {packet_size:.1f} bytes")
+        if duration is not None and duration < thresholds["short_duration"]:
+            evidence.append(f"Short flow duration: {duration * 1000:.3f} ms")
         return evidence
-    
+
     def _c2_beacon_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate evidence for C2_BEACON detection"""
         evidence = []
-        
-        # Repeated destination connections
-        dst_connection_count = flow_data.get('dst_connection_count', 0)
-        if dst_connection_count > 100:
-            evidence.append(f"High repeated connections: {dst_connection_count} to same destination (beaconing pattern)")
-        elif dst_connection_count > 50:
-            evidence.append(f"Frequent repeated connections: {dst_connection_count} to same destination")
-        
-        # Single destination (C2 server)
-        dst_host_count = flow_data.get('dst_host_count', 0)
-        if dst_host_count == 1:
-            evidence.append(f"Single destination host: {dst_host_count} (consistent C2 server contact)")
-        
-        # Timing regularity (low coefficient of variation)
-        cv_interarrival = flow_data.get('cv_interarrival', 0)
-        if cv_interarrival < 0.3:
-            evidence.append(f"High timing regularity: CV={cv_interarrival:.2f} (periodic beaconing intervals)")
-        elif cv_interarrival < 0.5:
-            evidence.append(f"Moderate timing regularity: CV={cv_interarrival:.2f} (structured communication)")
-        
-        # Inter-arrival time analysis
-        mean_interarrival = flow_data.get('mean_interarrival', 0)
-        if mean_interarrival > 0:
-            evidence.append(f"Mean inter-arrival time: {mean_interarrival:.1f}s (consistent beacon interval)")
-        
-        # Limited port diversity
-        dst_port_count = flow_data.get('dst_port_count', 0)
-        if dst_port_count == 1:
-            evidence.append(f"Single destination port: {dst_port_count} (consistent C2 communication channel)")
-        
-        # Connection count per destination
-        if dst_connection_count > 0 and dst_host_count > 0:
-            avg_conns_per_host = dst_connection_count / dst_host_count
-            if avg_conns_per_host > 50:
-                evidence.append(f"High connections per host: {avg_conns_per_host:.0f} (repeated C2 check-ins)")
-        
-        if not evidence:
-            evidence.append("C2 beaconing detected based on repeated connections and timing patterns")
-        
+        connection_count = _value(flow_data, "dst_connection_count")
+        host_count = _value(flow_data, "dst_host_count")
+        port_count = _value(flow_data, "dst_port_count")
+        mean_iat = _value(flow_data, "mean_interarrival")
+        std_iat = _value(flow_data, "std_interarrival")
+        cv_iat = _value(flow_data, "cv_interarrival")
+        thresholds = EVIDENCE_THRESHOLDS["C2_BEACON"]
+        if connection_count is not None and connection_count >= thresholds["repeated_connections"]:
+            evidence.append(f"Repeated connections to destination: {connection_count:.0f} (threshold: {thresholds['repeated_connections']})")
+        if host_count is not None and host_count == 1:
+            evidence.append(f"Destination hosts contacted: {host_count:.0f}")
+        if port_count is not None and port_count == 1:
+            evidence.append(f"Destination ports contacted: {port_count:.0f}")
+        if cv_iat is not None and cv_iat < thresholds["cv_interarrival"]:
+            evidence.append(f"Timing regularity: CV={cv_iat:.3f} (threshold: {thresholds['cv_interarrival']:.2f})")
+        elif cv_iat is not None and cv_iat < 0.5:
+            evidence.append(f"Timing regularity: CV={cv_iat:.3f}")
+        if mean_iat is not None and mean_iat > 0:
+            evidence.append(f"Mean inter-arrival time: {mean_iat:.3f} seconds")
+        if std_iat is not None and std_iat > 0:
+            evidence.append(f"Inter-arrival standard deviation: {std_iat:.3f} seconds")
         return evidence
-    
+
     def _dns_tunnel_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate evidence for DNS_TUNNEL detection"""
         evidence = []
-        
-        # Query length analysis
-        dns_query_length = flow_data.get('dns_query_length', 0)
-        if dns_query_length > 30:
-            evidence.append(f"Long DNS queries: {dns_query_length:.0f} characters avg (normal < 20)")
-        elif dns_query_length > 20:
-            evidence.append(f"Elevated DNS query length: {dns_query_length:.0f} characters avg")
-        
-        # Maximum query length
-        dns_max_query_length = flow_data.get('dns_max_query_length', 0)
-        if dns_max_query_length > 40:
-            evidence.append(f"Maximum query length: {dns_max_query_length:.0f} characters (suspicious for tunneling)")
-        
-        # High entropy queries
-        dns_entropy = flow_data.get('dns_entropy', 0)
-        if dns_entropy > 3.5:
-            evidence.append(f"High query entropy: {dns_entropy:.2f} (indicates encoded data)")
-        elif dns_entropy > 2.5:
-            evidence.append(f"Elevated query entropy: {dns_entropy:.2f} (unusual for normal DNS)")
-        
-        # Unique subdomain count
-        dns_unique_subdomain_count = flow_data.get('dns_unique_subdomain_count', 0)
-        if dns_unique_subdomain_count > 0:
-            evidence.append(f"Unique subdomains: {dns_unique_subdomain_count} (random subdomain generation)")
-        
-        # Subdomain entropy
-        dns_subdomain_entropy = flow_data.get('dns_subdomain_entropy', 0)
-        if dns_subdomain_entropy > 3.0:
-            evidence.append(f"High subdomain entropy: {dns_subdomain_entropy:.2f} (encoded tunneling data)")
-        
-        # Query frequency
-        dns_query_count = flow_data.get('dns_query_count', 0)
-        if dns_query_count > 1:
-            evidence.append(f"Multiple queries: {dns_query_count} per flow (tunneling requires frequent queries)")
-        
-        # Protocol check (should be UDP/DNS)
-        protocol = flow_data.get('protocol', 0)
-        if protocol == 17:  # UDP
-            evidence.append("UDP protocol used (consistent with DNS traffic)")
-        
-        if not evidence:
-            evidence.append("DNS tunneling detected based on query patterns and entropy analysis")
-        
+        query_length = _value(flow_data, "dns_query_length")
+        max_length = _value(flow_data, "dns_max_query_length")
+        query_entropy = _value(flow_data, "dns_entropy")
+        unique_subdomains = _value(flow_data, "dns_unique_subdomain_count")
+        subdomain_entropy = _value(flow_data, "dns_subdomain_entropy")
+        query_count = _value(flow_data, "dns_query_count")
+        thresholds = EVIDENCE_THRESHOLDS["DNS_TUNNEL"]
+        if query_length is not None and query_length > thresholds["query_length"]:
+            evidence.append(f"Average DNS query length: {query_length:.1f} characters (threshold: {thresholds['query_length']})")
+        if max_length is not None and max_length > 40:
+            evidence.append(f"Maximum DNS query length: {max_length:.1f} characters")
+        if query_entropy is not None and query_entropy > thresholds["query_entropy"]:
+            evidence.append(f"DNS query entropy: {query_entropy:.3f} (threshold: {thresholds['query_entropy']})")
+        if unique_subdomains is not None and unique_subdomains > 0:
+            evidence.append(f"Unique subdomains: {unique_subdomains:.0f}")
+        if subdomain_entropy is not None and subdomain_entropy > thresholds["subdomain_entropy"]:
+            evidence.append(f"DNS subdomain entropy: {subdomain_entropy:.3f} (threshold: {thresholds['subdomain_entropy']})")
+        if query_count is not None and query_count > 1:
+            evidence.append(f"DNS queries in flow: {query_count:.0f}")
+        protocol = _protocol_name(flow_data.get("protocol"))
+        if protocol:
+            evidence.append(f"Observed protocol: {protocol}")
         return evidence
-    
+
     def _benign_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate evidence for BENIGN classification"""
         evidence = []
-        
-        # Normal packet rates
-        packets_per_second = flow_data.get('packets_per_second', 0)
-        if packets_per_second < 100:
-            evidence.append(f"Normal packet rate: {packets_per_second:.0f} packets/second")
-        
-        # Normal query lengths
-        dns_query_length = flow_data.get('dns_query_length', 0)
-        if dns_query_length > 0 and dns_query_length < 20:
-            evidence.append(f"Normal DNS query length: {dns_query_length:.0f} characters")
-        
-        # Low entropy
-        dns_entropy = flow_data.get('dns_entropy', 0)
-        if dns_entropy > 0 and dns_entropy < 2.0:
-            evidence.append(f"Low query entropy: {dns_entropy:.2f} (normal DNS patterns)")
-        
-        # Moderate port diversity
-        dst_port_count = flow_data.get('dst_port_count', 0)
-        if dst_port_count > 1 and dst_port_count < 10:
-            evidence.append(f"Normal port diversity: {dst_port_count} unique ports")
-        
-        # Normal timing variation
-        cv_interarrival = flow_data.get('cv_interarrival', 0)
-        if cv_interarrival > 0.5 or cv_interarrival == 0:
-            evidence.append(f"Normal timing variation: CV={cv_interarrival:.2f}")
-        
-        if not evidence:
-            evidence.append("Normal traffic patterns detected")
-        
+        packet_rate = _value(flow_data, "packets_per_second")
+        query_length = _value(flow_data, "dns_query_length")
+        port_count = _value(flow_data, "dst_port_count")
+        cv_iat = _value(flow_data, "cv_interarrival")
+        if packet_rate is not None and packet_rate < 100:
+            evidence.append(f"Packet rate: {packet_rate:.1f} packets/second")
+        if query_length is not None and 0 < query_length < 20:
+            evidence.append(f"DNS query length: {query_length:.1f} characters")
+        if port_count is not None and 1 < port_count < 10:
+            evidence.append(f"Destination ports contacted: {port_count:.0f}")
+        if cv_iat is not None:
+            evidence.append(f"Inter-arrival CV: {cv_iat:.3f}")
         return evidence
-    
+
     def _generic_evidence(self, flow_data: Dict[str, Any]) -> List[str]:
-        """Generate generic evidence for unknown threat classes"""
-        return ["Threat detected based on anomalous traffic patterns"]
+        return []
 
 
 class AlertGenerator:
-    """Generate human-readable alerts from evidence"""
-    
-    def __init__(self, evidence_engine: EvidenceEngine):
+    """Build the backend-owned alert schema from one measured flow row."""
+
+    threat_severity = {
+        "SYN_FLOOD": "CRITICAL",
+        "DNS_TUNNEL": "HIGH",
+        "C2_BEACON": "HIGH",
+        "PORT_SCAN": "MEDIUM",
+        "BENIGN": "NONE",
+    }
+
+    def __init__(self, evidence_engine: EvidenceEngine, model_metadata: Optional[Dict[str, Any]] = None):
         self.evidence_engine = evidence_engine
-        # Threat-based severity mapping
-        self.threat_severity = {
-            'SYN_FLOOD': 'CRITICAL',
-            'DNS_TUNNEL': 'HIGH',
-            'C2_BEACON': 'HIGH',
-            'PORT_SCAN': 'MEDIUM',
-            'BENIGN': 'NONE'
-        }
-    
-    def generate_alert(self, flow_data: Dict[str, Any], prediction: str, 
-                      confidence: float = 1.0) -> Dict[str, Any]:
-        """Generate a complete alert with evidence"""
+        self.model_metadata = model_metadata or {}
+
+    def generate_alert(self, flow_data: Dict[str, Any], prediction: str, confidence: float = 0.0) -> Dict[str, Any]:
         evidence = self.evidence_engine.generate_evidence(flow_data, prediction, confidence)
-        
-        alert = {
-            'timestamp': evidence['timestamp'],
-            'flow_id': evidence['flow_id'],
-            'threat_class': evidence['threat_class'],
-            'confidence': evidence['confidence'],
-            'severity': self._get_severity(evidence['threat_class']),
-            'evidence': evidence['evidence']
+        model = dict(self.model_metadata)
+        return {
+            "timestamp": evidence["timestamp"],
+            "flow_id": evidence["flow_id"],
+            "source_ip": flow_data.get("src_ip"),
+            "destination_ip": flow_data.get("dst_ip"),
+            "source_port": flow_data.get("src_port"),
+            "destination_port": flow_data.get("dst_port"),
+            "protocol": _protocol_name(flow_data.get("protocol")),
+            "threat_class": prediction,
+            "confidence": confidence,
+            "severity": self.threat_severity.get(prediction, "UNKNOWN"),
+            "model": model,
+            "evidence": evidence["evidence"],
         }
-        
-        return alert
-    
-    def _get_severity(self, threat_class: str) -> str:
-        """Get severity based on threat class"""
-        return self.threat_severity.get(threat_class, 'UNKNOWN')
-    
-    def _generate_summary(self, evidence: Dict[str, Any]) -> str:
-        """Generate a human-readable summary of the alert"""
-        threat_class = evidence['threat_class']
-        evidence_points = evidence['evidence']
-        
-        if threat_class == 'BENIGN':
-            return "Normal traffic detected with no suspicious patterns"
-        
-        summary = f"{threat_class} detected: "
-        if evidence_points:
-            summary += evidence_points[0]
-            if len(evidence_points) > 1:
-                summary += f" (+{len(evidence_points)-1} more indicators)"
-        
-        return summary
-    
-    def generate_batch_alerts(self, flows_df: pd.DataFrame, predictions: np.ndarray) -> List[Dict[str, Any]]:
-        """Generate alerts for multiple flows"""
+
+    def generate_batch_alerts(self, flows_df, predictions, probabilities=None) -> List[Dict[str, Any]]:
         alerts = []
-        
-        for idx, row in flows_df.iterrows():
-            flow_data = row.to_dict()
-            prediction = predictions[idx]
-            
-            # Calculate confidence (simplified - in real system would use model probabilities)
-            confidence = 1.0  # Using deterministic predictions for now
-            
-            alert = self.generate_alert(flow_data, prediction, confidence)
-            alerts.append(alert)
-        
+        for position, (_, row) in enumerate(flows_df.iterrows()):
+            prediction = predictions[position]
+            confidence = float(probabilities[position].max()) if probabilities is not None else 0.0
+            alerts.append(self.generate_alert(row.to_dict(), prediction, confidence))
         return alerts

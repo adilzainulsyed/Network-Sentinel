@@ -19,4 +19,10 @@ button { cursor: pointer; }
 .status-pulse { animation: pulse 2.2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 .reveal { animation: rise .45s ease both; }
+.severity { display: inline-flex; border-radius: 999px; padding: 0.2rem 0.55rem; font-size: 0.65rem; font-weight: 600; letter-spacing: .08em; }
+.severity-critical { color: #fecaca; background: rgba(239, 68, 68, .16); border: 1px solid rgba(248, 113, 113, .3); }
+.severity-high { color: #fed7aa; background: rgba(249, 115, 22, .16); border: 1px solid rgba(251, 146, 60, .3); }
+.severity-medium { color: #fde68a; background: rgba(234, 179, 8, .14); border: 1px solid rgba(250, 204, 21, .3); }
+.severity-low { color: #bfdbfe; background: rgba(59, 130, 246, .14); border: 1px solid rgba(96, 165, 250, .3); }
+.severity-none { color: #cbd5e1; background: rgba(100, 116, 139, .14); border: 1px solid rgba(148, 163, 184, .3); }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

@@ -1,0 +1,98 @@
+{
+  "split": {
+    "train": 9041,
+    "validation": 1938,
+    "test": 1938
+  },
+  "accuracy": 1.0,
+  "classification_report": {
+    "BENIGN": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 749.0
+    },
+    "C2_BEACON": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 294.0
+    },
+    "DNS_TUNNEL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 295.0
+    },
+    "PORT_SCAN": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 300.0
+    },
+    "SYN_FLOOD": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 300.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1938.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1938.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      749,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      294,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      295,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      300,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      300
+    ]
+  ],
+  "labels": [
+    "BENIGN",
+    "C2_BEACON",
+    "DNS_TUNNEL",
+    "PORT_SCAN",
+    "SYN_FLOOD"
+  ],
+  "evaluation_note": "Random stratified row split; samples are not capture-disjoint, so this is not a production generalization estimate."
+}

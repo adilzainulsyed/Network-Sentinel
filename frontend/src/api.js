@@ -23,6 +23,7 @@ export const api = {
   health: () => request('/health'),
   alerts: (limit = 100) => request(`/alerts?limit=${limit}`),
   statistics: () => request('/statistics'),
+  resetSession: () => request('/session/reset', { method: 'POST' }),
   simulate: (payload) => request('/simulate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

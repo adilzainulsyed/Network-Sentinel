@@ -1,0 +1,1619 @@
+{
+  "generated_at": "2026-09-04T15:12:05.848523+00:00",
+  "dataset": {
+    "path": "C:\\Users\\adilz\\OneDrive\\Documents\\asssignments_or_projects\\Network-Sentinel\\data\\datasets\\full_dataset.csv",
+    "rows": 12917,
+    "labels": [
+      "BENIGN",
+      "C2_BEACON",
+      "DNS_TUNNEL",
+      "PORT_SCAN",
+      "SYN_FLOOD"
+    ],
+    "split": {
+      "train": 9041,
+      "validation": 1938,
+      "test": 1938
+    }
+  },
+  "top_15_features": [
+    {
+      "feature": "dst_connection_count",
+      "importance": 0.20402407783631557
+    },
+    {
+      "feature": "dst_port_count",
+      "importance": 0.1975290614861733
+    },
+    {
+      "feature": "dst_host_count",
+      "importance": 0.1806600652204375
+    },
+    {
+      "feature": "src_dst_byte_ratio",
+      "importance": 0.06961450027016045
+    },
+    {
+      "feature": "byte_count",
+      "importance": 0.061217387138391526
+    },
+    {
+      "feature": "mean_packet_size",
+      "importance": 0.05221940274808029
+    },
+    {
+      "feature": "dns_entropy",
+      "importance": 0.040981047008630124
+    },
+    {
+      "feature": "bytes_per_second",
+      "importance": 0.038357693086646945
+    },
+    {
+      "feature": "dns_max_query_length",
+      "importance": 0.03422371227756668
+    },
+    {
+      "feature": "dns_query_length",
+      "importance": 0.030085543844197926
+    },
+    {
+      "feature": "dns_unique_subdomain_count",
+      "importance": 0.026334602265301356
+    },
+    {
+      "feature": "dns_query_count",
+      "importance": 0.024580172804736792
+    },
+    {
+      "feature": "dns_subdomain_entropy",
+      "importance": 0.020499220242434855
+    },
+    {
+      "feature": "protocol",
+      "importance": 0.019029329806025688
+    },
+    {
+      "feature": "packet_count",
+      "importance": 0.00018685183523122143
+    }
+  ],
+  "leakage_audit": {
+    "label_in_features": false,
+    "simulator_or_attack_name_in_features": false,
+    "suspicious_feature_names": [],
+    "filename_or_path_columns": [],
+    "identifier_columns_in_features": [],
+    "raw_dataset_columns": [
+      "src_ip",
+      "dst_ip",
+      "src_port",
+      "dst_port",
+      "protocol",
+      "flow_duration",
+      "packet_count",
+      "byte_count",
+      "packets_per_second",
+      "bytes_per_second",
+      "mean_packet_size",
+      "std_packet_size",
+      "mean_interarrival",
+      "std_interarrival",
+      "cv_interarrival",
+      "dst_port_count",
+      "dst_host_count",
+      "dst_connection_count",
+      "src_dst_byte_ratio",
+      "dns_query_length",
+      "dns_max_query_length",
+      "dns_query_count",
+      "dns_entropy",
+      "dns_unique_subdomain_count",
+      "dns_subdomain_entropy",
+      "label"
+    ],
+    "feature_columns": [
+      "protocol",
+      "flow_duration",
+      "packet_count",
+      "byte_count",
+      "packets_per_second",
+      "bytes_per_second",
+      "mean_packet_size",
+      "std_packet_size",
+      "mean_interarrival",
+      "std_interarrival",
+      "cv_interarrival",
+      "dst_port_count",
+      "dst_host_count",
+      "dst_connection_count",
+      "src_dst_byte_ratio",
+      "dns_query_length",
+      "dns_max_query_length",
+      "dns_query_count",
+      "dns_entropy",
+      "dns_unique_subdomain_count",
+      "dns_subdomain_entropy"
+    ]
+  },
+  "standard_all_features": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "classification_report": {
+      "BENIGN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 749.0
+      },
+      "C2_BEACON": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 294.0
+      },
+      "DNS_TUNNEL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 295.0
+      },
+      "PORT_SCAN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 300.0
+      },
+      "SYN_FLOOD": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 300.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1938.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1938.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        749,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        294,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        295,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        300,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        300
+      ]
+    ],
+    "class_metrics": {
+      "BENIGN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0
+      },
+      "C2_BEACON": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0
+      },
+      "DNS_TUNNEL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0
+      },
+      "PORT_SCAN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0
+      },
+      "SYN_FLOOD": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0
+      }
+    }
+  },
+  "ablations": {
+    "rate_and_duration": {
+      "removed_features": [
+        "flow_duration",
+        "packet_count",
+        "byte_count",
+        "packets_per_second",
+        "bytes_per_second"
+      ],
+      "remaining_feature_count": 16,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "packet_size": {
+      "removed_features": [
+        "mean_packet_size",
+        "std_packet_size"
+      ],
+      "remaining_feature_count": 19,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "interarrival_timing": {
+      "removed_features": [
+        "mean_interarrival",
+        "std_interarrival",
+        "cv_interarrival"
+      ],
+      "remaining_feature_count": 18,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "destination_diversity": {
+      "removed_features": [
+        "dst_port_count",
+        "dst_host_count",
+        "dst_connection_count"
+      ],
+      "remaining_feature_count": 18,
+      "standard": {
+        "accuracy": 0.6904024767801857,
+        "macro_f1": 0.5428026692087703,
+        "weighted_f1": 0.5798740950396515,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 0.5552260934025204,
+            "recall": 1.0,
+            "f1-score": 0.7140133460438512,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 300.0
+          },
+          "accuracy": 0.6904024767801857,
+          "macro avg": {
+            "precision": 0.5110452186805041,
+            "recall": 0.6,
+            "f1-score": 0.5428026692087703,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 0.5185058534357522,
+            "recall": 0.6904024767801857,
+            "f1-score": 0.5798740950396515,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            300,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            300,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 0.10546448087431694,
+        "macro_f1": 0.4163768928771733,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            1500,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            137,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 0.04269005847953217,
+            "recall": 1.0,
+            "f1-score": 0.08188446438586652,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 137.0
+          },
+          "accuracy": 0.10546448087431694,
+          "macro avg": {
+            "precision": 0.4085380116959064,
+            "recall": 0.6,
+            "f1-score": 0.4163768928771733,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 0.06727670725082287,
+            "recall": 0.10546448087431694,
+            "f1-score": 0.06884019994544714,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "byte_direction": {
+      "removed_features": [
+        "src_dst_byte_ratio"
+      ],
+      "remaining_feature_count": 20,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "dns_behavior": {
+      "removed_features": [
+        "dns_query_length",
+        "dns_max_query_length",
+        "dns_query_count",
+        "dns_entropy",
+        "dns_unique_subdomain_count",
+        "dns_subdomain_entropy"
+      ],
+      "remaining_feature_count": 15,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    },
+    "protocol": {
+      "removed_features": [
+        "protocol"
+      ],
+      "remaining_feature_count": 20,
+      "standard": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0,
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 749.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 294.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 295.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 300.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1938.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            749,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            294,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            295,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            300,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            300
+          ]
+        ]
+      },
+      "varied_holdout": {
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": [
+          [
+            73,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            37,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            83,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1500,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            137
+          ]
+        ],
+        "classification_report": {
+          "BENIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 73.0
+          },
+          "C2_BEACON": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 37.0
+          },
+          "DNS_TUNNEL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 83.0
+          },
+          "PORT_SCAN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1500.0
+          },
+          "SYN_FLOOD": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 137.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1830.0
+          }
+        }
+      }
+    }
+  },
+  "varied_holdout_baseline": {
+    "samples": 1829,
+    "classification_report": {
+      "BENIGN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 73.0
+      },
+      "C2_BEACON": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 37.0
+      },
+      "DNS_TUNNEL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 83.0
+      },
+      "PORT_SCAN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1500.0
+      },
+      "SYN_FLOOD": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 136.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1829.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1829.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        73,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        37,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        83,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1500,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        136
+      ]
+    ],
+    "labels": [
+      "BENIGN",
+      "C2_BEACON",
+      "DNS_TUNNEL",
+      "PORT_SCAN",
+      "SYN_FLOOD"
+    ],
+    "confidence_min": 0.4,
+    "confidence_max": 1.0,
+    "confidence_mean": 0.8872061235647897,
+    "note": "Generated with changed packet counts, ports, targets, beacon intervals, jitter, and DNS lengths/encoding; this is still synthetic and not a production accuracy estimate."
+  },
+  "conclusion": "No direct target, simulator-name, filename/path, or class-encoding identifier leakage was found in the feature contract. Perfect scores remain consistent with highly separable synthetic behavioral distributions; capture-disjoint real-world validation is still required."
+}
