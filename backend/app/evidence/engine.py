@@ -270,18 +270,12 @@ class AlertGenerator:
         evidence = self.evidence_engine.generate_evidence(flow_data, prediction, confidence)
         
         alert = {
-            'alert_id': evidence['flow_id'],
             'timestamp': evidence['timestamp'],
+            'flow_id': evidence['flow_id'],
             'threat_class': evidence['threat_class'],
             'confidence': evidence['confidence'],
-            'evidence': evidence['evidence'],
-            'source_ip': flow_data.get('src_ip', 'unknown'),
-            'destination_ip': flow_data.get('dst_ip', 'unknown'),
-            'source_port': flow_data.get('src_port', 0),
-            'destination_port': flow_data.get('dst_port', 0),
-            'protocol': flow_data.get('protocol', 0),
             'severity': self._get_severity(evidence['threat_class']),
-            'summary': self._generate_summary(evidence)
+            'evidence': evidence['evidence']
         }
         
         return alert

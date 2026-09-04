@@ -103,8 +103,9 @@ def main():
             print(f"\nAlert {i}:")
             print(f"  Threat: {alert['threat_class']}")
             print(f"  Severity: {alert['severity']}")
-            print(f"  Source: {alert['source_ip']}:{alert['source_port']} -> {alert['destination_ip']}:{alert['destination_port']}")
-            print(f"  Summary: {alert['summary']}")
+            print(f"  Confidence: {alert['confidence']}")
+            print(f"  Flow ID: {alert['flow_id']}")
+            print(f"  Timestamp: {alert['timestamp']}")
             print(f"  Evidence:")
             for evidence in alert['evidence']:
                 print(f"    - {evidence}")
